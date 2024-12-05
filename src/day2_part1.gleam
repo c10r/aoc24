@@ -8,7 +8,7 @@ pub fn num_safe_reports(reports: List(List(Int))) -> Int {
   |> list.length
 }
 
-fn is_safe_report(report: List(Int)) -> Bool {
+pub fn is_safe_report(report: List(Int)) -> Bool {
   case report {
     [first, second, ..] -> {
       case first - second {

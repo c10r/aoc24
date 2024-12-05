@@ -3,8 +3,22 @@ import gleam/list
 import gleam/pair
 import gleam/result
 import gleam/string
+import gleam/string_tree
 
 import simplifile
+
+pub fn print_list(l: List(Int)) -> String {
+  let tree =
+    string_tree.new()
+    |> string_tree.append(int.to_string(list.first(l) |> result.unwrap(0)))
+
+  list.drop(l, 1)
+  |> list.take(list.length(l) - 2)
+  |> list.fold(tree, fn(t, x) { string_tree.append(t, "," <> int.to_string(x)) })
+  |> string_tree.append(",")
+  |> string_tree.append(int.to_string(list.last(l) |> result.unwrap(0)))
+  |> string_tree.to_string
+}
 
 pub fn read_file(filename: String) -> Result(String, Nil) {
   result.replace_error(simplifile.read(filename), Nil)
