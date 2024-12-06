@@ -1,5 +1,4 @@
 import gleam/dict
-import gleam/io
 import gleam/list
 import gleam/order
 import gleam/pair
@@ -9,6 +8,13 @@ pub fn crossword_count(content: String, word: String) -> Int {
   let crossword = create_crossword(content)
 
   list.map(dict.keys(crossword), fn(info) { search(info, word, crossword) })
+  |> list.fold(0, fn(x, y) { x + y })
+}
+
+pub fn crossword_x_count(content: String, word: String) -> Int {
+  let crossword = create_crossword(content)
+
+  list.map(dict.keys(crossword), fn(info) { search_x(info, word, crossword) })
   |> list.fold(0, fn(x, y) { x + y })
 }
 
@@ -22,6 +28,64 @@ fn create_crossword(content: String) -> dict.Dict(#(Int, Int), String) {
   })
   |> list.flatten
   |> dict.from_list
+}
+
+fn search_x(
+  index: #(Int, Int),
+  word: String,
+  crossword: dict.Dict(#(Int, Int), String),
+) -> Int {
+  let #(x, y) = #(pair.first(index), pair.second(index))
+  // M.M
+  // .A.
+  // S.S
+  let south_search =
+    [
+      search_southwest(x + string.length(word) - 1, y, word, crossword),
+      search_southeast(x, y, word, crossword),
+    ]
+    |> coalesce_search
+  // S.S
+  // .A.
+  // M.M
+  let north_search =
+    [
+      search_northwest(
+        x + string.length(word) - 1,
+        y + string.length(word) - 1,
+        word,
+        crossword,
+      ),
+      search_northeast(x, y + string.length(word) - 1, word, crossword),
+    ]
+    |> coalesce_search
+  // M.S
+  // .A.
+  // M.S
+  let diag_search =
+    [
+      search_southeast(x, y, word, crossword),
+      search_northeast(x, y + string.length(word) - 1, word, crossword),
+    ]
+    |> coalesce_search
+  // S.M
+  // .A.
+  // S.M
+  let rev_diag_search =
+    [
+      search_southwest(x + string.length(word) - 1, y, word, crossword),
+      search_northwest(
+        x + string.length(word) - 1,
+        y + string.length(word) - 1,
+        word,
+        crossword,
+      ),
+    ]
+    |> coalesce_search
+  case south_search + north_search + diag_search + rev_diag_search {
+    0 -> 0
+    _ -> 1
+  }
 }
 
 fn search(
