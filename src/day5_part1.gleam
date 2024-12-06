@@ -20,7 +20,23 @@ pub fn get_update_middles(updates: String, inputs: String) -> Int {
   |> list.map(get_middle_update)
   |> result.all
   |> result.map(fn(middles) { list.fold(middles, 0, fn(x, y) { x + y }) })
-  |> result.unwrap(-101)
+  |> result.unwrap(-1)
+}
+
+pub fn get_incorrect_update_middles(updates: String, inputs: String) -> Int {
+  let input_orders = create_input_rules(inputs) |> create_pageorder
+
+  create_input_updates(updates)
+  |> list.filter(fn(x) { !is_update_valid(x, input_orders) })
+  |> list.map(fn(u) { fix_update(u, input_orders) })
+  |> list.map(get_middle_update)
+  |> result.all
+  |> result.map(fn(middles) { list.fold(middles, 0, fn(x, y) { x + y }) })
+  |> result.unwrap(-1)
+}
+
+fn fix_update(update: List(Int), orders: PageOrder) -> List(Int) {
+  todo
 }
 
 fn get_middle_update(update: List(Int)) -> Result(Int, Nil) {

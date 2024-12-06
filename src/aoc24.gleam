@@ -9,7 +9,7 @@ pub fn main() {
   let updates = utils.read_file("./inputs/day5_part2_2.txt")
 
   let res = case updates, orders {
-    Ok(u), Ok(o) -> day5_part1.get_update_middles(u, o)
+    Ok(u), Ok(o) -> day5_part1.get_incorrect_update_middles(u, o)
     _, _ -> -1
   }
 
