@@ -22,17 +22,12 @@ fn helper(list1: List(Int), list2: List(Int)) -> Result(Int, Nil) {
   )
   let #(length1, length2) = #(list.length(list1), list.length(list2))
   let #(smaller, larger) = case length1 - length2 {
-    n if n < 0 -> #(list1, list2)
+    n if n <= 0 -> #(list1, list2)
     n if n > 0 -> #(list2, list1)
-    _ -> #(list1, list2)
+    _ -> panic as "Should not ever be here"
   }
 
-  let result =
-    list.map2(smaller, larger, fn(x, y) { int.absolute_value(x - y) })
-    |> list.reduce(fn(x, y) { x + y })
-
-  case result {
-    Ok(num) -> Ok(num)
-    _ -> Error(Nil)
-  }
+  list.map2(smaller, larger, fn(x, y) { int.absolute_value(x - y) })
+  |> list.reduce(fn(x, y) { x + y })
+  |> result.replace_error(Nil)
 }
