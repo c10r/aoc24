@@ -1,6 +1,7 @@
 import gleam/dict
 import gleam/int
 import gleam/list
+import gleam/order
 import gleam/pair
 import gleam/result
 import gleam/set
@@ -28,7 +29,7 @@ pub fn get_incorrect_update_middles(updates: String, inputs: String) -> Int {
 
   create_input_updates(updates)
   |> list.filter(fn(x) { !is_update_valid(x, input_orders) })
-  |> list.map(fn(u) { fix_update(u, input_orders) })
+  |> list.map(fn(u) { fix_update(u, get_order_for_update(u, input_orders)) })
   |> list.map(get_middle_update)
   |> result.all
   |> result.map(fn(middles) { list.fold(middles, 0, fn(x, y) { x + y }) })
@@ -36,7 +37,87 @@ pub fn get_incorrect_update_middles(updates: String, inputs: String) -> Int {
 }
 
 fn fix_update(update: List(Int), orders: PageOrder) -> List(Int) {
-  todo
+  let update_index = create_index_dict(update)
+  let order_list = dict.to_list(orders) |> list.map(pair.second) |> list.flatten
+
+  fix_update_helper(update_index, order_list, 0, list.length(update))
+  |> result.unwrap(dict.new())
+  |> dict.to_list
+  |> list.sort(fn(tup1, tup2) {
+    let index1 = pair.second(tup1)
+    let index2 = pair.second(tup2)
+
+    case index1 - index2 {
+      n if n > 0 -> order.Gt
+      n if n < 0 -> order.Lt
+      _ -> order.Eq
+    }
+  })
+  |> list.map(pair.first)
+}
+
+// Given the following update: [61,13,29]
+// Here are the relevant rules: [#(61,13), #(29,13), #(61,29)]
+// Create an index dict: { 61: 0, 13: 1, 29: 2 }
+// Update indices to satisfy each rule, one at a time
+fn fix_update_helper(
+  update: dict.Dict(Int, Int),
+  rules: Rules,
+  rule_index: Int,
+  current_max_index: Int,
+) -> Result(dict.Dict(Int, Int), Nil) {
+  let num_rules = list.length(rules)
+  case num_rules - rule_index - 1 {
+    n if n == 0 -> Ok(update)
+    _ -> {
+      let new_rule = list.drop(rules, rule_index) |> list.take(1)
+      case new_rule {
+        [rule] -> {
+          let #(first, second) = #(
+            dict.get(update, pair.first(rule)),
+            dict.get(update, pair.second(rule)),
+          )
+          case first, second {
+            Ok(x), Ok(y) -> {
+              case x < y {
+                True ->
+                  fix_update_helper(
+                    update,
+                    rules,
+                    rule_index + 1,
+                    current_max_index,
+                  )
+                False -> {
+                  let key_to_update =
+                    update
+                    |> dict.filter(fn(_, value) { value == y })
+                    |> dict.keys
+                    |> list.first
+                  case key_to_update {
+                    Ok(new_key) -> {
+                      let new_update =
+                        dict.upsert(update, new_key, fn(_) {
+                          current_max_index + 1
+                        })
+                      fix_update_helper(
+                        new_update,
+                        rules,
+                        0,
+                        current_max_index + 1,
+                      )
+                    }
+                    _ -> Error(Nil)
+                  }
+                }
+              }
+            }
+            _, _ -> Error(Nil)
+          }
+        }
+        _ -> Ok(update)
+      }
+    }
+  }
 }
 
 fn get_middle_update(update: List(Int)) -> Result(Int, Nil) {
