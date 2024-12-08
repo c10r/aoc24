@@ -1,7 +1,9 @@
+import gleam/dict
 import gleam/int
 import gleam/list
 import gleam/pair
 import gleam/result
+import gleam/set
 import gleam/string
 import gleam/string_tree
 
@@ -13,6 +15,21 @@ pub fn print_tuple(l: #(Int, Int)) -> String {
   <> ","
   <> pair.second(l) |> int.to_string
   <> ")"
+}
+
+pub fn print_dict(d: dict.Dict(Int, set.Set(Int))) -> String {
+  let tree = string_tree.new() |> string_tree.append("{")
+  dict.keys(d)
+  |> list.fold(tree, fn(t, key) {
+    case dict.get(d, key) {
+      Ok(nums) ->
+        string_tree.append(t, "\n" <> int.to_string(key) <> ": ")
+        |> string_tree.append(utils.print_list(nums |> set.to_list))
+      _ -> panic as "Key must exist"
+    }
+  })
+  |> string_tree.append("\n}")
+  |> string_tree.to_string
 }
 
 pub fn print_list(l: List(Int)) -> String {

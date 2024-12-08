@@ -1,12 +1,10 @@
 import gleam/dict
-import gleam/int
 import gleam/list
 import gleam/option
 import gleam/pair
 import gleam/result
 import gleam/set
 import gleam/string
-import gleam/string_tree
 
 import utils
 
@@ -121,21 +119,6 @@ fn antinodes_for_station(
   })
   |> list.flatten
   |> list.filter(fn(coord) { result.is_ok(dict.get(city_map, coord)) })
-}
-
-fn print_dict(d: dict.Dict(Int, set.Set(Int))) -> String {
-  let tree = string_tree.new() |> string_tree.append("{")
-  dict.keys(d)
-  |> list.fold(tree, fn(t, key) {
-    case dict.get(d, key) {
-      Ok(nums) ->
-        string_tree.append(t, "\n" <> int.to_string(key) <> ": ")
-        |> string_tree.append(utils.print_list(nums |> set.to_list))
-      _ -> panic as "Key must exist"
-    }
-  })
-  |> string_tree.append("\n}")
-  |> string_tree.to_string
 }
 
 fn create_station_map(city_map: CityMap) -> StationMap {
