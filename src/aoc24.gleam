@@ -1,15 +1,15 @@
 import gleam/int
 import gleam/io
 
-import day6_part2
+import day7_part1
 import utils
 
 pub fn main() {
-  let maze = utils.read_file("./inputs/day6_part2.txt")
-  case maze {
+  let content = utils.read_file("./inputs/day7_part2.txt")
+  case content {
     Ok(content) -> {
-      let squares = day6_part2.get_cycle_obstacles(content)
-      io.println(int.to_string(squares))
+      let total = day7_part1.total_calibration(content)
+      io.println(int.to_string(total))
     }
     _ -> io.println("Corrupt file")
   }
