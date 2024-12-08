@@ -7,17 +7,60 @@ import gleam/string_tree
 
 import simplifile
 
-pub fn print_list(l: List(Int)) -> String {
-  let tree =
-    string_tree.new()
-    |> string_tree.append(int.to_string(list.first(l) |> result.unwrap(0)))
+pub fn print_tuple(l: #(Int, Int)) -> String {
+  "("
+  <> pair.first(l) |> int.to_string
+  <> ","
+  <> pair.second(l) |> int.to_string
+  <> ")"
+}
 
-  list.drop(l, 1)
-  |> list.take(list.length(l) - 2)
-  |> list.fold(tree, fn(t, x) { string_tree.append(t, "," <> int.to_string(x)) })
-  |> string_tree.append(",")
-  |> string_tree.append(int.to_string(list.last(l) |> result.unwrap(0)))
-  |> string_tree.to_string
+pub fn print_list(l: List(Int)) -> String {
+  case l {
+    [] -> "[]"
+    [x] -> int.to_string(x)
+    [x, y] -> int.to_string(x) <> "," <> int.to_string(y)
+    _ -> {
+      let tree =
+        string_tree.new()
+        |> string_tree.append(int.to_string(list.first(l) |> result.unwrap(0)))
+
+      list.drop(l, 1)
+      |> list.take(list.length(l) - 2)
+      |> list.fold(tree, fn(t, x) {
+        string_tree.append(t, "," <> int.to_string(x))
+      })
+      |> string_tree.append(",")
+      |> string_tree.append(int.to_string(list.last(l) |> result.unwrap(0)))
+      |> string_tree.to_string
+    }
+  }
+}
+
+pub fn print_tuple_list(l: List(#(Int, Int))) -> String {
+  case l {
+    [] -> "[]"
+    [x] -> "[" <> print_tuple(x) <> "]"
+    [x, y] -> "[" <> print_tuple(x) <> "," <> print_tuple(y) <> "]"
+    _ -> {
+      let tree =
+        string_tree.new()
+        |> string_tree.append("[")
+        |> string_tree.append(print_tuple(
+          list.first(l) |> result.unwrap(#(0, 0)),
+        ))
+
+      list.drop(l, 1)
+      |> list.take(list.length(l) - 2)
+      |> list.fold(tree, fn(t, x) {
+        string_tree.append(t, "," <> print_tuple(x))
+      })
+      |> string_tree.append(",")
+      |> string_tree.append(print_tuple(list.last(l) |> result.unwrap(#(0, 0))))
+      |> string_tree.append("]")
+      |> string_tree.to_string
+    }
+  }
 }
 
 pub fn read_file(filename: String) -> Result(String, Nil) {

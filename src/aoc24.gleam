@@ -1,14 +1,15 @@
 import gleam/int
 import gleam/io
 
-import day7_part1
+import day8_part1
 import utils
 
 pub fn main() {
-  let content = utils.read_file("./inputs/day7_part1.txt")
+  let content = utils.read_file("./inputs/day8_part5.txt")
+
   case content {
     Ok(content) -> {
-      let total = day7_part1.total_calibration(content)
+      let total = day8_part1.antinode_count_part_2(content)
       io.println(int.to_string(total))
     }
     _ -> io.println("Corrupt file")
