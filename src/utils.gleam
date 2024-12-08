@@ -24,7 +24,7 @@ pub fn print_dict(d: dict.Dict(Int, set.Set(Int))) -> String {
     case dict.get(d, key) {
       Ok(nums) ->
         string_tree.append(t, "\n" <> int.to_string(key) <> ": ")
-        |> string_tree.append(utils.print_list(nums |> set.to_list))
+        |> string_tree.append(print_list(nums |> set.to_list))
       _ -> panic as "Key must exist"
     }
   })

@@ -1,7 +1,7 @@
 import gleam/int
 import gleam/io
 
-import day8_part1
+import day8_part2
 import utils
 
 pub fn main() {
@@ -9,7 +9,7 @@ pub fn main() {
 
   case content {
     Ok(content) -> {
-      let total = day8_part1.antinode_count_part_2(content)
+      let total = day8_part2.antinode_count(content)
       io.println(int.to_string(total))
     }
     _ -> io.println("Corrupt file")
