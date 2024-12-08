@@ -22,7 +22,16 @@ pub fn total_calibration(content: String) -> Int {
 }
 
 fn process_equation(eq: Equation) -> Result(Int, Nil) {
-  process_eq_helper(eq, 0)
+  let #(total, operands) = #(pair.first(eq), pair.second(eq))
+  case operands {
+    [] -> Error(Nil)
+    [first] ->
+      case first == total {
+        True -> Ok(total)
+        _ -> Error(Nil)
+      }
+    [first, ..] -> process_eq_helper(#(total, list.drop(operands, 1)), first)
+  }
 }
 
 fn process_eq_helper(eq: Equation, accum: Int) -> Result(Int, Nil) {
@@ -35,19 +44,23 @@ fn process_eq_helper(eq: Equation, accum: Int) -> Result(Int, Nil) {
       }
     [first, ..] ->
       result.or(
+        result.or(
+          process_eq_helper(#(total, list.drop(operands, 1)), first * accum),
+          process_eq_helper(#(total, list.drop(operands, 1)), first + accum),
+        ),
         process_eq_helper(
           #(total, list.drop(operands, 1)),
-          first * get_multiplication_accum(accum),
+          concat_operation(accum, first),
         ),
-        process_eq_helper(#(total, list.drop(operands, 1)), first + accum),
       )
   }
 }
 
-fn get_multiplication_accum(accum: Int) -> Int {
-  case accum {
-    0 -> 1
-    _ -> accum
+fn concat_operation(accum: Int, new: Int) -> Int {
+  let result = int.parse(int.to_string(accum) <> int.to_string(new))
+  case result {
+    Ok(num) -> num
+    _ -> panic as "Invalid concat operation"
   }
 }
 
