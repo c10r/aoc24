@@ -1,7 +1,7 @@
 import gleam/int
 import gleam/io
 
-import day10_part1
+import day10
 import utils
 
 pub fn main() {
@@ -9,7 +9,7 @@ pub fn main() {
 
   case content {
     Ok(content) -> {
-      let total = day10_part1.trailhead_rating(content)
+      let total = day10.trailhead_rating(content)
       io.println(int.to_string(total))
     }
     _ -> io.println("Corrupt file")
