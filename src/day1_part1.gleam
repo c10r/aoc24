@@ -1,6 +1,5 @@
 import gleam/int
 import gleam/list
-import gleam/pair
 import gleam/result
 
 import utils
@@ -9,7 +8,7 @@ pub fn total_distance(filename: String) -> Result(Int, Nil) {
   utils.read_file(filename)
   |> result.map(fn(content) {
     utils.create_list(content)
-    |> result.map(fn(x) { helper(pair.first(x), pair.second(x)) })
+    |> result.map(fn(x) { helper(x.0, x.1) })
     |> result.flatten
   })
   |> result.flatten

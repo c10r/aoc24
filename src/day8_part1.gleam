@@ -1,7 +1,6 @@
 import gleam/dict
 import gleam/list
 import gleam/option
-import gleam/pair
 import gleam/result
 import gleam/set
 import gleam/string
@@ -41,12 +40,9 @@ fn antinodes_for_station(
   coords
   |> list.combination_pairs
   |> list.map(fn(combination_pair) {
-    let #(c1, c2) = #(
-      pair.first(combination_pair),
-      pair.second(combination_pair),
-    )
-    let #(x1, y1) = #(pair.first(c1), pair.second(c1))
-    let #(x2, y2) = #(pair.first(c2), pair.second(c2))
+    let #(c1, c2) = #(combination_pair.0, combination_pair.1)
+    let #(x1, y1) = #(c1.0, c1.1)
+    let #(x2, y2) = #(c2.0, c2.1)
     let xdiff = x1 - x2
     let ydiff = y1 - y2
     [#(x1 + xdiff, y1 + ydiff), #(x2 - xdiff, y2 - ydiff)]
@@ -59,8 +55,8 @@ pub fn create_station_map(city_map: CityMap) -> StationMap {
   dict.filter(city_map, fn(_, value) { value != "." })
   |> dict.to_list
   |> list.fold(dict.new(), fn(accum_dict, station) {
-    let #(coord, station) = #(pair.first(station), pair.second(station))
-    dict.upsert(accum_dict, station, fn(val) {
+    let #(coord, s) = #(station.0, station.1)
+    dict.upsert(accum_dict, s, fn(val) {
       case val {
         option.Some(vals) -> list.append(vals, [coord])
         option.None -> [coord]

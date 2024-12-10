@@ -1,6 +1,5 @@
 import gleam/dict
 import gleam/list
-import gleam/pair
 import gleam/result
 
 import utils
@@ -11,7 +10,7 @@ pub fn similarity(filename: String) -> Result(Int, Nil) {
     let lists = utils.create_list(content)
 
     lists
-    |> result.map(fn(x) { helper(pair.first(x), pair.second(x)) })
+    |> result.map(fn(x) { helper(x.0, x.1) })
     |> result.flatten
   })
   |> result.flatten

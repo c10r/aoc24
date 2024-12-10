@@ -1,7 +1,5 @@
 import gleam/dict
-import gleam/int
 import gleam/list
-import gleam/pair
 import gleam/set
 import gleam/string
 
@@ -31,14 +29,8 @@ pub fn get_unique_squares(content: String) -> Int {
     // Guard already outside the maze
     Error(_) -> 0
     Ok(g) -> {
-      let postprocess_maze = maze |> dict.upsert(pair.first(g), fn(_) { Empty })
-      helper(
-        postprocess_maze,
-        pair.first(g),
-        pair.second(g),
-        set.from_list([pair.first(g)]),
-      )
-      |> set.size
+      let postprocess_maze = maze |> dict.upsert(g.0, fn(_) { Empty })
+      helper(postprocess_maze, g.0, g.1, set.from_list([g.0])) |> set.size
     }
   }
 }
@@ -87,7 +79,7 @@ fn get_next_square(
   start: Coordinate,
   direction: Direction,
 ) -> Result(Coordinate, Nil) {
-  let #(x, y) = #(pair.first(start), pair.second(start))
+  let #(x, y) = #(start.0, start.1)
   let next_square = case direction {
     Up -> #(x - 1, y)
     Down -> #(x + 1, y)

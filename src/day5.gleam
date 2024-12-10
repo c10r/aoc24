@@ -44,8 +44,8 @@ fn fix_update(update: List(Int), orders: PageOrder) -> List(Int) {
   |> result.unwrap(dict.new())
   |> dict.to_list
   |> list.sort(fn(tup1, tup2) {
-    let index1 = pair.second(tup1)
-    let index2 = pair.second(tup2)
+    let index1 = tup1.1
+    let index2 = tup2.1
 
     case index1 - index2 {
       n if n > 0 -> order.Gt
@@ -74,8 +74,8 @@ fn fix_update_helper(
       case new_rule {
         [rule] -> {
           let #(first, second) = #(
-            dict.get(update, pair.first(rule)),
-            dict.get(update, pair.second(rule)),
+            dict.get(update, rule.0),
+            dict.get(update, rule.1),
           )
           case first, second {
             Ok(x), Ok(y) -> {
@@ -135,12 +135,12 @@ fn is_update_valid(update: List(Int), input_orders: PageOrder) -> Bool {
 
   orders_for_update
   |> dict.to_list
-  |> list.map(fn(tuple) { pair.second(tuple) })
+  |> list.map(pair.second)
   |> list.flatten
   |> list.map(fn(rule) {
     let #(first, second) = #(
-      dict.get(index_dict, pair.first(rule)),
-      dict.get(index_dict, pair.second(rule)),
+      dict.get(index_dict, rule.0),
+      dict.get(index_dict, rule.1),
     )
     case first, second {
       Ok(x), Ok(y) -> {
@@ -170,8 +170,7 @@ fn get_order_for_update(update: List(Int), orders: PageOrder) -> PageOrder {
   |> dict.map_values(fn(_, value) {
     value
     |> list.filter(fn(tuple) {
-      set.contains(update_set, pair.first(tuple))
-      && set.contains(update_set, pair.second(tuple))
+      set.contains(update_set, tuple.0) && set.contains(update_set, tuple.1)
     })
   })
   |> dict.filter(fn(_, value) { list.length(value) > 0 })
@@ -180,13 +179,13 @@ fn get_order_for_update(update: List(Int), orders: PageOrder) -> PageOrder {
 fn create_pageorder(rules: Rules) -> PageOrder {
   rules
   |> list.map(fn(rule) {
-    let #(x, y) = #(pair.first(rule), pair.second(rule))
+    let #(x, y) = #(rule.0, rule.1)
     [#(x, rule), #(y, rule)]
   })
   |> list.flatten
-  |> list.group(fn(item) { pair.first(item) })
+  |> list.group(fn(item) { item.0 })
   |> dict.map_values(fn(_, value: List(#(Int, #(Int, Int)))) {
-    value |> list.map(fn(tuple) { pair.second(tuple) })
+    value |> list.map(pair.second)
   })
 }
 

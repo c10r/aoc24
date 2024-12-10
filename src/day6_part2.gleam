@@ -1,7 +1,5 @@
 import gleam/dict
-import gleam/int
 import gleam/list
-import gleam/pair
 import gleam/set
 import gleam/string
 
@@ -35,18 +33,12 @@ pub fn get_cycle_obstacles(content: String) -> Int {
     Error(_) -> 0
     Ok(g) -> {
       maze
-      |> dict.upsert(pair.first(g), fn(_) { Empty })
-      |> generate_all_possible_mazes(pair.first(g))
+      |> dict.upsert(g.0, fn(_) { Empty })
+      |> generate_all_possible_mazes(g.0)
       |> list.map(fn(m) {
-        case pair.second(g) {
+        case g.1 {
           Empty | Obstacle -> panic as "Guard not found"
-          Guard(d) ->
-            is_cycle(
-              m,
-              pair.first(g),
-              pair.second(g),
-              set.from_list([#(pair.first(g), d)]),
-            )
+          Guard(d) -> is_cycle(m, g.0, g.1, set.from_list([#(g.0, d)]))
         }
       })
       |> list.filter(fn(x) { x })
@@ -135,7 +127,7 @@ fn get_next_square(
   start: Coordinate,
   direction: Direction,
 ) -> Result(Coordinate, Nil) {
-  let #(x, y) = #(pair.first(start), pair.second(start))
+  let #(x, y) = #(start.0, start.1)
   let next_square = case direction {
     Up -> #(x - 1, y)
     Down -> #(x + 1, y)

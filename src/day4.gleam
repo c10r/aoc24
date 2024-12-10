@@ -1,7 +1,6 @@
 import gleam/dict
 import gleam/list
 import gleam/order
-import gleam/pair
 import gleam/string
 
 pub fn crossword_count(content: String, word: String) -> Int {
@@ -35,7 +34,7 @@ fn search_x(
   word: String,
   crossword: dict.Dict(#(Int, Int), String),
 ) -> Int {
-  let #(x, y) = #(pair.first(index), pair.second(index))
+  let #(x, y) = #(index.0, index.1)
   // M.M
   // .A.
   // S.S
@@ -93,7 +92,7 @@ fn search(
   word: String,
   crossword: dict.Dict(#(Int, Int), String),
 ) -> Int {
-  let #(x, y) = #(pair.first(index), pair.second(index))
+  let #(x, y) = #(index.0, index.1)
   [
     search_north(x, y, word, crossword),
     search_northeast(x, y, word, crossword),
@@ -125,8 +124,7 @@ fn search_direction(
   list.range(0, string.length(word) - 1)
   |> list.zip(string.to_graphemes(word))
   |> list.map(fn(index_letter_pair) {
-    let index = pair.first(index_letter_pair)
-    let letter = pair.second(index_letter_pair)
+    let #(index, letter) = #(index_letter_pair.0, index_letter_pair.1)
 
     let result = dict.get(crossword, next_index(index))
     case result {

@@ -114,8 +114,8 @@ fn next_coordinates(
 
 fn get_trailheads(map: Map) -> List(Coordinate) {
   dict.to_list(map)
-  |> list.filter(fn(tup) { pair.second(tup) == 0 })
-  |> list.map(fn(tup) { pair.first(tup) })
+  |> list.filter(fn(tup) { tup.1 == 0 })
+  |> list.map(pair.first)
 }
 
 fn create_map(content: String) -> Map {
@@ -132,9 +132,7 @@ fn create_map(content: String) -> Map {
     })
   })
   |> list.flatten
-  |> list.filter(fn(element) { result.is_ok(pair.second(element)) })
-  |> list.map(fn(element) {
-    #(pair.first(element), result.unwrap(pair.second(element), -1))
-  })
+  |> list.filter(fn(element) { result.is_ok(element.1) })
+  |> list.map(fn(element) { #(element.0, result.unwrap(element.1, -1)) })
   |> dict.from_list
 }

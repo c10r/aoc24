@@ -1,7 +1,6 @@
 import gleam/dict
 import gleam/int
 import gleam/list
-import gleam/pair
 import gleam/result
 import gleam/set
 import gleam/string
@@ -10,11 +9,7 @@ import gleam/string_tree
 import simplifile
 
 pub fn print_tuple(l: #(Int, Int)) -> String {
-  "("
-  <> pair.first(l) |> int.to_string
-  <> ","
-  <> pair.second(l) |> int.to_string
-  <> ")"
+  "(" <> l.0 |> int.to_string <> "," <> l.1 |> int.to_string <> ")"
 }
 
 pub fn print_dict(d: dict.Dict(Int, set.Set(Int))) -> String {
@@ -106,16 +101,13 @@ pub fn create_list(content: String) -> Result(#(List(Int), List(Int)), Nil) {
   split_lines
   |> result.map(fn(split_list: List(#(String, String))) {
     list.map(split_list, fn(tuple: #(String, String)) {
-      #(
-        int.parse(string.trim(pair.first(tuple))),
-        int.parse(string.trim(pair.second(tuple))),
-      )
+      #(int.parse(string.trim(tuple.0)), int.parse(string.trim(tuple.1)))
     })
     |> list.unzip()
   })
   |> result.map(
     fn(two_lists: #(List(Result(Int, Nil)), List(Result(Int, Nil)))) {
-      #(result.all(pair.first(two_lists)), result.all(pair.second(two_lists)))
+      #(result.all(two_lists.0), result.all(two_lists.1))
     },
   )
   |> result.map(fn(x: #(Result(List(Int), Nil), Result(List(Int), Nil))) {

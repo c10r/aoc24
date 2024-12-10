@@ -1,6 +1,5 @@
 import gleam/int
 import gleam/list
-import gleam/pair
 
 pub fn num_safe_reports(reports: List(List(Int))) -> Int {
   reports
@@ -24,8 +23,7 @@ pub fn is_safe_report(report: List(Int)) -> Bool {
 fn compare_pairs(report: List(Int), cmp: fn(Int, Int) -> Bool) -> Bool {
   create_pairs(report)
   |> list.map(fn(p) {
-    let x = pair.first(p)
-    let y = pair.second(p)
+    let #(x, y) = #(p.0, p.1)
     cmp(x, y) && max_diff(x, y)
   })
   |> list.all(fn(bool) { bool })

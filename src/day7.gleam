@@ -1,6 +1,5 @@
 import gleam/int
 import gleam/list
-import gleam/pair
 import gleam/result
 import gleam/string
 
@@ -22,7 +21,7 @@ pub fn total_calibration(content: String) -> Int {
 }
 
 fn process_equation(eq: Equation) -> Result(Int, Nil) {
-  let #(total, operands) = #(pair.first(eq), pair.second(eq))
+  let #(total, operands) = #(eq.0, eq.1)
   case operands {
     [] -> Error(Nil)
     [first] ->
@@ -35,7 +34,7 @@ fn process_equation(eq: Equation) -> Result(Int, Nil) {
 }
 
 fn process_eq_helper(eq: Equation, accum: Int) -> Result(Int, Nil) {
-  let #(total, operands) = #(pair.first(eq), pair.second(eq))
+  let #(total, operands) = #(eq.0, eq.1)
   case operands {
     [] ->
       case accum == total {

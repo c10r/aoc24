@@ -1,6 +1,5 @@
 import gleam/dict
 import gleam/list
-import gleam/pair
 import gleam/result
 import gleam/set
 
@@ -26,12 +25,9 @@ fn antinode_for_station(
   coords
   |> list.combination_pairs
   |> list.map(fn(combination_pair) {
-    let #(c1, c2) = #(
-      pair.first(combination_pair),
-      pair.second(combination_pair),
-    )
-    let #(x1, y1) = #(pair.first(c1), pair.second(c1))
-    let #(x2, y2) = #(pair.first(c2), pair.second(c2))
+    let #(c1, c2) = #(combination_pair.0, combination_pair.1)
+    let #(x1, y1) = #(c1.0, c1.1)
+    let #(x2, y2) = #(c2.0, c2.1)
     let xdiff = x1 - x2
     let ydiff = y1 - y2
     [
@@ -54,7 +50,7 @@ fn helper(
   case dict.get(city_map, start) {
     Ok(_) ->
       helper(
-        #(pair.first(start) + delta_x, pair.second(start) + delta_y),
+        #(start.0 + delta_x, start.1 + delta_y),
         delta_x,
         delta_y,
         city_map,
