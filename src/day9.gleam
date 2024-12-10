@@ -26,49 +26,8 @@ fn compact(disk_map: List(String)) -> List(String) {
   }
 }
 
-fn compact_helper(disk_map: List(String), accum: List(String)) -> List(String) {
-  // Manually find leftmost dot index
-  let leftmost_dot =
-    disk_map
-    |> list.index_map(fn(x, idx) { #(x, idx) })
-    |> list.find(fn(pair) { pair.0 == "." })
-    |> result.map(fn(pair) { pair.1 })
-    |> result.unwrap(-1)
-
-  // Manually find rightmost non-dot index
-  let rightmost_file =
-    disk_map
-    |> list.reverse
-    |> list.index_map(fn(x, idx) { #(x, idx) })
-    |> list.find(fn(pair) { pair.0 != "." })
-    |> result.map(fn(pair) { list.length(disk_map) - 1 - pair.1 })
-    |> result.unwrap(-1)
-
-  case leftmost_dot, rightmost_file {
-    dot, file if dot != -1 && file != -1 && dot < file -> {
-      let file_value =
-        disk_map
-        |> list.drop(file)
-        |> list.first
-        |> result.unwrap("")
-
-      let moved_map =
-        disk_map
-        |> list.take(dot)
-        |> list.append([file_value])
-        |> list.append(list.drop(disk_map, dot + 1))
-        |> list.take(file)
-        |> list.append(["."])
-        |> list.append(list.drop(disk_map, file + 1))
-
-      compact_helper(moved_map, accum)
-    }
-    _, _ -> disk_map
-  }
-}
-
 // Does not add the remaining dots at the end
-fn blah(disk_map: List(String), accum: List(String)) -> List(String) {
+fn compact_helper(disk_map: List(String), accum: List(String)) -> List(String) {
   case disk_map {
     [] -> accum
     _ -> {

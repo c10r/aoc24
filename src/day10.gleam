@@ -61,7 +61,7 @@ fn rating_helper(
         rating_helper(next_coord, map, updated_path, accum)
       })
     }
-    _ -> found_paths
+    _ -> panic as "Cannot have a non-existant node on the current_path"
   }
 }
 
@@ -84,7 +84,7 @@ fn score_helper(
         score_helper(next_coord, map, updated_path, accum)
       })
     }
-    _ -> found_ends
+    _ -> panic as "Cannot have a non-existant node on the current_path"
   }
 }
 
