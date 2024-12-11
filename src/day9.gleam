@@ -35,7 +35,7 @@ fn compact_helper(map: DiskMap, accum: DiskMap) -> DiskMap {
         File(_) -> compact_helper(rest, list.append(accum, [next]))
         Empty -> {
           let new_rev =
-            list.drop_while(list.reverse(map), fn(b) {
+            list.drop_while(list.reverse(rest), fn(b) {
               case b {
                 Empty -> True
                 _ -> False
@@ -43,8 +43,7 @@ fn compact_helper(map: DiskMap, accum: DiskMap) -> DiskMap {
             })
           case list.first(new_rev) {
             Ok(f) -> {
-              let new_map =
-                list.drop(new_rev, 1) |> list.reverse |> list.drop(1)
+              let new_map = list.drop(new_rev, 1) |> list.reverse
               compact_helper(new_map, list.append(accum, [f]))
             }
             _ -> accum
