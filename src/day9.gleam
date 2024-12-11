@@ -23,20 +23,19 @@ pub fn checksum(content: String) -> Int {
 fn compact(map: DiskMap) -> DiskMap {
   case map {
     [] | [_] -> map
-    _ -> compact_helper(map, list.reverse(map), list.new())
+    _ -> compact_helper(map, list.new())
   }
 }
 
-fn compact_helper(map: DiskMap, rev_map: DiskMap, accum: DiskMap) -> DiskMap {
+fn compact_helper(map: DiskMap, accum: DiskMap) -> DiskMap {
   case map {
     [] -> accum
     [next, ..rest] ->
       case next {
-        File(_) ->
-          compact_helper(rest, list.reverse(rest), list.append(accum, [next]))
+        File(_) -> compact_helper(rest, list.append(accum, [next]))
         Empty -> {
           let new_rev =
-            list.drop_while(rev_map, fn(b) {
+            list.drop_while(list.reverse(map), fn(b) {
               case b {
                 Empty -> True
                 _ -> False
@@ -46,11 +45,7 @@ fn compact_helper(map: DiskMap, rev_map: DiskMap, accum: DiskMap) -> DiskMap {
             Ok(f) -> {
               let new_map =
                 list.drop(new_rev, 1) |> list.reverse |> list.drop(1)
-              compact_helper(
-                new_map,
-                new_map |> list.reverse,
-                list.append(accum, [f]),
-              )
+              compact_helper(new_map, list.append(accum, [f]))
             }
             _ -> accum
           }
