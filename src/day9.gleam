@@ -1,80 +1,84 @@
 import gleam/int
-import gleam/io
 import gleam/list
+import gleam/pair
 import gleam/result
 import gleam/string
 
+type Block {
+  Empty
+  File(id: Int)
+}
+
+type DiskMap =
+  List(Block)
+
 pub fn checksum(content: String) -> Int {
-  let disk_map = process_disk_map(content)
-
-  let compacted =
-    disk_map
-    |> compact
-
-  compacted
-  |> list.map(int.parse)
-  |> result.values
-  |> list.index_fold(0, fn(accum, new_elem, index) {
-    accum + { index * new_elem }
-  })
-}
-
-fn compact(disk_map: List(String)) -> List(String) {
-  case disk_map {
-    [] | [_] -> disk_map
-    _ -> compact_helper(disk_map, list.new())
-  }
-}
-
-// Does not add the remaining dots at the end
-fn compact_helper(disk_map: List(String), accum: List(String)) -> List(String) {
-  case disk_map {
-    [] -> accum
-    _ -> {
-      case list.first(disk_map) {
-        Ok(char) ->
-          case char {
-            "." -> {
-              let padding =
-                list.drop(disk_map, 1)
-                |> list.reverse
-                |> list.drop_while(fn(char) { char == "." })
-              case padding {
-                [] -> accum
-                [first, ..rest] ->
-                  compact_helper(
-                    list.reverse(rest),
-                    list.append(accum, [first]),
-                  )
-              }
-            }
-            _ ->
-              compact_helper(list.drop(disk_map, 1), list.append(accum, [char]))
-          }
-        _ -> panic as "List must not be empty"
-      }
-    }
-  }
-}
-
-fn process_disk_map(content: String) -> List(String) {
   content
   |> string.trim
-  |> string.to_graphemes
-  |> list.index_map(fn(char, index) {
-    case int.parse(char) {
-      Ok(num) -> {
-        get_char(index, num) |> string.to_graphemes
+  |> create_diskmap
+  |> compact
+  |> calculate
+}
+
+fn compact(map: DiskMap) -> DiskMap {
+  case map {
+    [] | [_] -> map
+    _ -> compact_helper(map, list.reverse(map), list.new())
+  }
+}
+
+fn compact_helper(map: DiskMap, rev_map: DiskMap, accum: DiskMap) -> DiskMap {
+  case map {
+    [] -> accum
+    [next, ..rest] ->
+      case next {
+        File(_) ->
+          compact_helper(rest, list.reverse(rest), list.append(accum, [next]))
+        Empty -> {
+          let new_rev =
+            list.drop_while(rev_map, fn(b) {
+              case b {
+                Empty -> True
+                _ -> False
+              }
+            })
+          case list.first(new_rev) {
+            Ok(f) -> {
+              let new_map =
+                list.drop(new_rev, 1) |> list.reverse |> list.drop(1)
+              compact_helper(
+                new_map,
+                new_map |> list.reverse,
+                list.append(accum, [f]),
+              )
+            }
+            _ -> accum
+          }
+        }
       }
-      _ -> panic as "Corrupt input file"
+  }
+}
+
+fn calculate(map: DiskMap) -> Int {
+  list.fold(map, #(0, 0), fn(accum, element) {
+    case element {
+      Empty -> accum
+      File(id) -> #(accum.0 + { id * accum.1 }, accum.1 + 1)
+    }
+  })
+  |> pair.first
+}
+
+fn create_diskmap(content: String) -> DiskMap {
+  string.trim(content)
+  |> string.to_graphemes
+  |> list.map(int.parse)
+  |> result.values
+  |> list.index_map(fn(num, index) {
+    case index % 2 {
+      0 -> list.repeat(File(index / 2), num)
+      _ -> list.repeat(Empty, num)
     }
   })
   |> list.flatten
-}
-
-fn get_char(index: Int, times: Int) -> String {
-  case index % 2 {
-    0 -> string.repeat(int.to_string(index / 2), times)
-    _ -> string.repeat(".", times)
-  }
 }
