@@ -32,6 +32,93 @@ pub fn total_price(content: String) -> Int {
   |> list.fold(0, fn(x, y) { x + y })
 }
 
+pub fn total_price_bulk_discount(content: String) -> Int {
+  parse_regions(content)
+  |> dict.map_values(fn(_, value) {
+    list.fold(value, 0, fn(accum, coords) {
+      accum + { calculate_area(coords) * calculate_perimeter_discount(coords) }
+    })
+  })
+  |> dict.values
+  |> list.fold(0, fn(x, y) { x + y })
+}
+
+fn calculate_perimeter_discount(coords: CoordinateSet) -> Int {
+  discount_perimeter_helper(set.to_list(coords), coords, 0)
+}
+
+fn discount_perimeter_helper(
+  remaining: List(Coordinate),
+  region_map: CoordinateSet,
+  corners: Int,
+) -> Int {
+  case remaining {
+    [] -> corners
+    [first, ..rest] ->
+      discount_perimeter_helper(
+        rest,
+        region_map,
+        corners + num_corners(first, region_map),
+      )
+  }
+}
+
+fn num_corners(coord: Coordinate, map: CoordinateSet) -> Int {
+  let topleft =
+    !set.contains(map, top(coord)) && !set.contains(map, left(coord))
+  let bottomleft =
+    !set.contains(map, bottom(coord)) && !set.contains(map, left(coord))
+  let topright =
+    !set.contains(map, top(coord)) && !set.contains(map, right(coord))
+  let bottomright =
+    !set.contains(map, bottom(coord)) && !set.contains(map, right(coord))
+
+  let innertopleft =
+    set.contains(map, top(coord))
+    && set.contains(map, left(coord))
+    && !set.contains(map, #(coord.0 - 1, coord.1 - 1))
+  let innertopright =
+    set.contains(map, top(coord))
+    && set.contains(map, right(coord))
+    && !set.contains(map, #(coord.0 - 1, coord.1 + 1))
+  let innerbottomleft =
+    set.contains(map, bottom(coord))
+    && set.contains(map, left(coord))
+    && !set.contains(map, #(coord.0 + 1, coord.1 - 1))
+  let innerbottomright =
+    set.contains(map, bottom(coord))
+    && set.contains(map, right(coord))
+    && !set.contains(map, #(coord.0 + 1, coord.1 + 1))
+
+  [
+    topleft,
+    bottomleft,
+    topright,
+    bottomright,
+    innertopleft,
+    innertopright,
+    innerbottomleft,
+    innerbottomright,
+  ]
+  |> list.count(fn(x) { x })
+}
+
+fn right(coord: Coordinate) -> Coordinate {
+  #(coord.0, coord.1 + 1)
+}
+
+fn left(coord: Coordinate) -> Coordinate {
+  #(coord.0, coord.1 - 1)
+}
+
+fn top(coord: Coordinate) -> Coordinate {
+  #(coord.0 - 1, coord.1)
+}
+
+fn bottom(coord: Coordinate) -> Coordinate {
+  #(coord.0 + 1, coord.1)
+}
+
 fn calculate_perimeter(coords: CoordinateSet) -> Int {
   perimeter_helper(set.to_list(coords), coords, 0)
 }
