@@ -1,5 +1,4 @@
 import gleam/int
-import gleam/io
 import gleam/list
 import gleam/pair
 import gleam/result
@@ -12,10 +11,10 @@ type Puzzle {
   Puzzle(a: Coordinate, b: Coordinate, prize: Coordinate)
 }
 
-pub fn fewest_tokens(content: String) -> Int {
-  let puzzles = create_puzzles(content)
+const error = 10_000_000_000_000
 
-  puzzles
+pub fn fewest_tokens(content: String, correct_error: Bool) -> Int {
+  create_puzzles(content, correct_error)
   |> list.map(solve_puzzle)
   |> result.values
   |> list.fold(0, fn(x, y) { x + y })
@@ -54,14 +53,15 @@ fn divides_evenly(x: Int, d: Int) -> Result(Int, Nil) {
   }
 }
 
-fn create_puzzles(content: String) -> List(Puzzle) {
+fn create_puzzles(content: String, correct_error: Bool) -> List(Puzzle) {
   let lines = string.trim(content) |> string.split("\n")
-  parse_puzzle(lines, []) |> pair.first
+  parse_puzzle(lines, [], correct_error) |> pair.first
 }
 
 fn parse_puzzle(
   lines: List(String),
   puzzles: List(Puzzle),
+  correct_error: Bool,
 ) -> #(List(Puzzle), List(String)) {
   case lines {
     [] -> #(puzzles, [])
@@ -80,8 +80,13 @@ fn parse_puzzle(
           parse_puzzle(
             rest,
             list.append(puzzles, [
-              Puzzle(parse_button(a), parse_button(b), parse_prize(p)),
+              Puzzle(
+                parse_button(a),
+                parse_button(b),
+                parse_prize(p, correct_error),
+              ),
             ]),
+            correct_error,
           )
       }
     }
@@ -89,12 +94,18 @@ fn parse_puzzle(
   }
 }
 
-fn parse_prize(line: String) -> Coordinate {
-  io.println("Parse prize: " <> line)
+fn parse_prize(line: String, correct_error: Bool) -> Coordinate {
   case string.split(line, ":") {
     [_, tail] ->
       case string.split(tail, ",") {
-        [x, y] -> #(extract_coord(x, "="), extract_coord(y, "="))
+        [x, y] ->
+          case correct_error {
+            True -> #(
+              extract_coord(x, "=") + error,
+              extract_coord(y, "=") + error,
+            )
+            False -> #(extract_coord(x, "="), extract_coord(y, "="))
+          }
         _ -> panic as "Malformed input- Prize line must contain ,"
       }
     _ -> panic as "Malformed input- Prize line must contain :"
