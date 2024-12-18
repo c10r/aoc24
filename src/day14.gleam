@@ -38,11 +38,17 @@ type Robot =
 pub fn safety_factor(content: String, height: Int, width: Int) -> Int {
   let robots =
     get_robot_positions(content)
-    |> list.map(fn(robot) { move_robot(robot, 100, width, height) })
-    |> list.map(pair.first)
+    |> list.fold(list.new(), fn(accum, robot) {
+      let new_robot =
+        list.fold(list.range(0, 99), robot, fn(accum, _) {
+          move_robot(accum, width, height)
+        })
+
+      list.append(accum, [new_robot])
+    })
 
   let quadrants =
-    list.map(robots, fn(x) { get_quadrant(x, height, width) })
+    list.map(robots, fn(x) { get_quadrant(x.0, height, width) })
     |> result.values
     |> list.map(fn(quad) { #(quad, 1) })
 
@@ -81,14 +87,7 @@ fn get_quadrant(
   }
 }
 
-fn move_robot(robot: Robot, times: Int, width: Int, height: Int) -> Robot {
-  case times {
-    t if t <= 0 -> robot
-    _ -> move_robot(next_coord(robot, width, height), times - 1, width, height)
-  }
-}
-
-fn next_coord(robot: Robot, width: Int, height: Int) -> Robot {
+fn move_robot(robot: Robot, width: Int, height: Int) -> Robot {
   let new_x = robot.0.0 + robot.1.0
   let wrapped_x = case new_x < 0 {
     True -> {
