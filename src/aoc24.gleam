@@ -1,11 +1,11 @@
 import gleam/int
 import gleam/io
 
-import day16_optimize as day16
+import day16
 import utils
 
 pub fn main() {
-  let maze = utils.read_file("./inputs/day16_part3.txt")
+  let maze = utils.read_file("./inputs/day16_part2.txt")
 
   case maze {
     Ok(content) -> {
